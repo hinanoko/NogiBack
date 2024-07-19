@@ -12,4 +12,6 @@ public class User {
     private Integer user_id;
     private String user_name;
     private String user_password;
+    private String user_token;
+    private Integer user_coins;
 }
