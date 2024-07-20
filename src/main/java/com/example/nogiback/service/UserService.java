@@ -1,6 +1,7 @@
 package com.example.nogiback.service;
 
 
+import com.example.nogiback.entity.Gamble;
 import com.example.nogiback.entity.LoginResponse;
 import com.example.nogiback.entity.User;
 import com.example.nogiback.mapper.UserMapper;
@@ -61,8 +62,9 @@ public class UserService {
         }
     }
 
+
     @Transactional
-    @Scheduled(fixedRate = 300000)
+    @Scheduled(fixedRate = 3000000)
     public void addCoinsToUser(){
         System.out.println("Adding coins to users...");
         userMapper.addCoinsToAllUsers();
