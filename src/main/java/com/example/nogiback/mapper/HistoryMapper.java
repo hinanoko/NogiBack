@@ -3,6 +3,7 @@ package com.example.nogiback.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.nogiback.entity.BlogCount;
+import com.example.nogiback.entity.BlogIdAndIdolId;
 import com.example.nogiback.entity.Gamble;
 import com.example.nogiback.entity.History;
 import org.apache.ibatis.annotations.*;
@@ -23,6 +24,9 @@ public interface HistoryMapper extends BaseMapper<History> {
             "WHERE blogIdolId BETWEEN '0001' AND '0032' " +
             "GROUP BY blogIdolId")
     List<BlogCount> countBlogsByIdolId();
+
+    @Select("SELECT blogId, blogIdolId FROM history WHERE blogIdolId BETWEEN '0001' AND '0032'")
+    List<BlogIdAndIdolId> findAllBlogIdsAndIdolIds();
 
     @Select("SELECT blogDate AS blogDate FROM history WHERE blogIdolId = #{idolId}")
     List<String> findBlogDatesByIdolId(@Param("idolId") String idolId);

@@ -3,6 +3,7 @@ package com.example.nogiback.controller;
 
 
 import com.example.nogiback.entity.BlogCount;
+import com.example.nogiback.entity.BlogDetail;
 import com.example.nogiback.entity.BlogSummary;
 import com.example.nogiback.entity.History;
 import com.example.nogiback.service.HistoryService;
@@ -22,7 +23,7 @@ public class HistoryController {
 
     @PostMapping
     public void gotNewBlog(@RequestBody History blogPost, @RequestHeader("Authorization") String token) {
-        System.out.println(blogPost);
+       // System.out.println(blogPost);
 
         // 转换 blogIdolId
         String originalIdolId = blogPost.getBlogIdolId();
@@ -51,6 +52,12 @@ public class HistoryController {
     public ResponseEntity<List<BlogSummary>> getBlogSummariesByIdolId(@RequestParam String idolId) {
         List<BlogSummary> summaries = historyService.getBlogSummariesByIdolId(idolId);
         return ResponseEntity.ok(summaries);
+    }
+
+    @GetMapping("/blog")
+    public ResponseEntity<BlogDetail> getBlogDetail(@RequestParam String idolId, @RequestParam Integer blogId) {
+        BlogDetail blogDetail = historyService.getBlogDetail(idolId, blogId);
+        return ResponseEntity.ok(blogDetail);
     }
 
 }

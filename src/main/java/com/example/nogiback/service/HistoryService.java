@@ -1,8 +1,6 @@
 package com.example.nogiback.service;
 
-import com.example.nogiback.entity.BlogCount;
-import com.example.nogiback.entity.BlogSummary;
-import com.example.nogiback.entity.History;
+import com.example.nogiback.entity.*;
 import com.example.nogiback.mapper.HistoryMapper;
 import com.example.nogiback.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -90,6 +85,7 @@ public class HistoryService {
     }
 
     private String saveImage(String base64Image, String folderPath) {
+        System.out.println(base64Image);
         // 移除可能存在的 "data:image/png;base64," 前缀
         String[] parts = base64Image.split(",");
         String imageString = parts.length > 1 ? parts[1] : parts[0];
@@ -118,7 +114,34 @@ public class HistoryService {
     }
 
     public List<BlogCount> getBlogCounts() {
-        return historyMapper.countBlogsByIdolId();
+        List<BlogIdAndIdolId> blogIdsAndIdolIds = historyMapper.findAllBlogIdsAndIdolIds();
+        Map<String, Integer> blogCountMap = new HashMap<>();
+
+        for (BlogIdAndIdolId blogIdAndIdolId : blogIdsAndIdolIds) {
+            String idolId = blogIdAndIdolId.getBlogIdolId();
+            Integer blogId = blogIdAndIdolId.getBlogId();
+
+            // Construct the blog folder path
+            String blogDirPath = uploadPath + idolId;
+            File blogDir = new File(blogDirPath);
+
+            // Find the folder for this blog post
+            File[] blogFolders = blogDir.listFiles((dir, name) -> name.endsWith("_" + String.format("%08d", blogId)));
+
+            if (blogFolders != null && blogFolders.length > 0) {
+                blogCountMap.put(idolId, blogCountMap.getOrDefault(idolId, 0) + 1);
+            }
+        }
+
+        List<BlogCount> blogCounts = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : blogCountMap.entrySet()) {
+            BlogCount blogCount = new BlogCount();
+            blogCount.setBlogIdolId(entry.getKey());
+            blogCount.setBlogCount(entry.getValue());
+            blogCounts.add(blogCount);
+        }
+
+        return blogCounts;
     }
 
     // 新增的方法：获取指定成员的博客简要信息
@@ -174,10 +197,51 @@ public class HistoryService {
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-            }
 
-            summaries.add(summary);
+                summaries.add(summary); // Add summary only if the folder and content file exist
+            }
         }
         return summaries;
+    }
+
+    public BlogDetail getBlogDetail(String idolId, Integer blogId) {
+        BlogDetail blogDetail = new BlogDetail();
+        blogDetail.setIdolId(idolId);
+        blogDetail.setBlogId(blogId);
+
+        String blogDirPath = uploadPath + idolId;
+        File blogDir = new File(blogDirPath);
+        File[] blogFolders = blogDir.listFiles((dir, name) -> name.endsWith("_" + String.format("%08d", blogId)));
+
+        if (blogFolders != null && blogFolders.length > 0) {
+            File blogFolder = blogFolders[0];
+            File contentFile = new File(blogFolder, "content.md");
+
+            if (contentFile.exists()) {
+                try {
+                    String content = new String(Files.readAllBytes(contentFile.toPath()));
+                    blogDetail.setContent(content);
+
+                    // 解析Markdown内容,提取图片信息
+                    List<String> imageUrls = new ArrayList<>();
+                    Pattern pattern = Pattern.compile("!\\[.*?\\]\\((.*?)\\)");
+                    Matcher matcher = pattern.matcher(content);
+                    while (matcher.find()) {
+                        String imagePath = matcher.group(1);
+                        File imageFile = new File(blogFolder, imagePath);
+                        if (imageFile.exists()) {
+                            byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
+                            String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+                            imageUrls.add("data:image/png;base64," + base64Image);
+                        }
+                    }
+                    blogDetail.setImageUrls(imageUrls);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return blogDetail;
     }
 }
