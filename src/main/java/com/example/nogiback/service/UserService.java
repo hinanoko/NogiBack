@@ -43,13 +43,14 @@ public class UserService {
             user.setUser_token(token);
             int updateResult = userMapper.updateTokenByName(realName, token);
             Integer coins = userMapper.getCoinsByName(user.getUser_name());
+            Integer userId = userMapper.getUserIdByName(user.getUser_name());
             if (updateResult > 0) {
-                return new LoginResponse("success to verify", token, coins);
+                return new LoginResponse("success to verify", token, coins, userId);
             } else {
                 throw new RuntimeException("Token update failed");
             }
         } else {
-            return new LoginResponse("fail to verify", null, 0);
+            return new LoginResponse("fail to verify", null, 0, 0);
         }
     }
 

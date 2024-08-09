@@ -30,4 +30,10 @@ public interface UserMapper extends BaseMapper<User> {
     @Update("UPDATE user SET user_coins = COALESCE(user_coins, 0) + 1")
     Integer addCoinsToAllUsers();
 
+    @Select("SELECT user_id FROM user WHERE user_name = #{userName}")
+    Integer getUserIdByName(@Param("userName") String userName);
+
+    @Select("SELECT user_name FROM user WHERE user_id = #{userId}")
+    String getUserNameById(@Param("userId") Integer userId);
+
 }

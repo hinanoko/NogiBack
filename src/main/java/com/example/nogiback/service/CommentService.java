@@ -5,6 +5,7 @@ import com.example.nogiback.entity.Comment;
 import com.example.nogiback.entity.CommentWithScore;
 import com.example.nogiback.mapper.CommentMapper;
 import com.example.nogiback.mapper.RankMapper;
+import com.example.nogiback.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,9 @@ public class CommentService {
 
     @Autowired
     private RankMapper rankMapper;  // 确保 rankMapper 通过 @Autowired 注入
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Autowired
     public CommentService(CommentMapper commentMapper){this.commentMapper = commentMapper;}
@@ -47,6 +51,8 @@ public class CommentService {
             // 根据评论的 customerName 和 memberId 去查找该用户对该成员的评分
             Integer memberMark = rankMapper.getMemberMark(comment.getCustomerId(), memberId);
 
+            String customerName = userMapper.getUserNameById(comment.getCustomerId());
+
             // 如果找不到该用户的评分，就设为 0
             if (memberMark == null) {
                 memberMark = 0;
@@ -60,6 +66,7 @@ public class CommentService {
             commentWithScore.setContent(comment.getContent());
             commentWithScore.setDate(comment.getDate());
             commentWithScore.setScore(memberMark);
+            commentWithScore.setCustomerName(customerName);
 
             // 添加到返回列表中
             commentsWithScore.add(commentWithScore);

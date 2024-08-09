@@ -3,6 +3,7 @@ package com.example.nogiback.controller;
 import com.example.nogiback.entity.MemberScoreAndRank;
 import com.example.nogiback.entity.RatingRequest;
 import com.example.nogiback.service.RankService;
+import com.example.nogiback.util.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,12 +28,17 @@ public class RankController {
     }
 
     @PostMapping("/rate")
-    public ResponseEntity<String> addRating(@RequestBody RatingRequest ratingRequest) {
-        try {
-            rankService.addRating(ratingRequest.getCustomerId(), ratingRequest.getMemberId(), ratingRequest.getMemberMark());
-            return ResponseEntity.ok("Rating added successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add rating: " + e.getMessage());
+    public ResponseEntity<String> addRating(@RequestBody RatingRequest ratingRequest, @RequestHeader("Authorization") String token) {
+        if (JwtUtil.checkToken(token)) {
+            try {
+                rankService.addRating(ratingRequest.getCustomerId(), ratingRequest.getMemberId(), ratingRequest.getMemberMark());
+                return ResponseEntity.ok("Rating added successfully.");
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add rating: " + e.getMessage());
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing token.");
         }
     }
+
 }

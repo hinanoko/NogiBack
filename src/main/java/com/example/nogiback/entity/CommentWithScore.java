@@ -3,6 +3,8 @@ package com.example.nogiback.entity;
 public class CommentWithScore {
     private int commentId;
     private int customerId;
+
+    private String customerName;
     private int memberId;
     private String content;
     private String date;
@@ -56,5 +58,13 @@ public class CommentWithScore {
 
     public void setScore(int score) {
         this.score = score;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
     }
 }

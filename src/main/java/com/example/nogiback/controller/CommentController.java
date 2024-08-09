@@ -3,7 +3,10 @@ package com.example.nogiback.controller;
 import com.example.nogiback.entity.Comment;
 import com.example.nogiback.entity.CommentWithScore;
 import com.example.nogiback.service.CommentService;
+import com.example.nogiback.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -21,8 +24,12 @@ public class CommentController {
     }
 
     @PostMapping("/add")
-    public String addComment(@RequestBody Comment comment) {
-        return commentService.addComment(comment);
+    public String addComment(@RequestBody Comment comment, @RequestHeader("Authorization") String token) {
+        if (JwtUtil.checkToken(token)) {
+            return commentService.addComment(comment);
+        }else {
+            return ("Invalid or missing token.");
+        }
     }
 
 

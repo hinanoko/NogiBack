@@ -52,6 +52,7 @@ public class UserController {
                 response.put("message", "Login successful");
                 response.put("token", user.getUser_token());
                 response.put("coins", whetherSuccess.getCoins());
+                response.put("userId", whetherSuccess.getUserId());
                 return ResponseEntity.ok().body(response);
             } else {
                 return ResponseEntity.badRequest().body("Login failed");
